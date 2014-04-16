@@ -42,7 +42,6 @@ import org.elasticsearch.search.facet.terms.doubles.InternalDoubleTermsFacet;
 import org.elasticsearch.search.facet.terms.longs.InternalLongTermsFacet;
 import org.elasticsearch.search.facet.termsstats.TermsStatsFacet;
 import org.elasticsearch.test.ElasticsearchIntegrationTest;
-import org.elasticsearch.test.junit.annotations.TestLogging;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -66,7 +65,6 @@ import static org.hamcrest.Matchers.*;
  *
  */
 
-@TestLogging("action.admin.indices.refresh:TRACE,action.search.type:TRACE,cluster.service:TRACE")
 public class SimpleFacetsTests extends ElasticsearchIntegrationTest {
     private int numRuns = -1;
 
@@ -367,7 +365,11 @@ public class SimpleFacetsTests extends ElasticsearchIntegrationTest {
                           @Override
                           public Facets run() {
                               final SearchRequestBuilder facetRequest;
-                              if (count.incrementAndGet() % 2 == 0) { // every second request is mapped
+                              int searchId = count.incrementAndGet();
+                              if (searchId % 100 == 0) {
+                                  logger.info("-> run {} searches", searchId);
+                              }
+                              if (searchId % 2 == 0) { // every second request is mapped
                                   facetRequest = cl.prepareSearch().setQuery(matchAllQuery())
                                           .addFacet(termsFacet("double").field("double").size(10))
                                           .addFacet(termsFacet("float").field("float").size(10))
@@ -394,6 +396,7 @@ public class SimpleFacetsTests extends ElasticsearchIntegrationTest {
                       }, 5000
             );
         }
+        logger.info("starting second duel");
         {
             duel.duel(new ConcurrentDuel.DuelJudge<Facets>() {
 
@@ -425,7 +428,12 @@ public class SimpleFacetsTests extends ElasticsearchIntegrationTest {
                           @Override
                           public Facets run() {
                               final SearchRequestBuilder facetRequest;
-                              switch (count.incrementAndGet() % 6) {
+                              int searchId = count.incrementAndGet();
+                              if (searchId % 100 == 0) {
+                                  logger.info("->  run {} searches", searchId);
+                              }
+
+                              switch (searchId % 6) {
                                   case 4:
                                       facetRequest = client().prepareSearch()
                                               .setQuery(matchAllQuery())
@@ -457,10 +465,7 @@ public class SimpleFacetsTests extends ElasticsearchIntegrationTest {
                                               .addFacet(termsFacet("termFacet").executionHint("map").field("name").size(10));
                                       break;
                               }
-                              int id = searchId.incrementAndGet();
-                              logger.info("running search: {}", id);
                               SearchResponse actionGet = facetRequest.execute().actionGet();
-                              logger.info("done search: {}", id);
                               return actionGet.getFacets();
                           }
                       }, 5000
@@ -533,6 +538,7 @@ public class SimpleFacetsTests extends ElasticsearchIntegrationTest {
                     .endObject()).execute().actionGet();
         }
 
+        logger.info("done indexing. refreshing.");
         flushAndRefresh();
         ConcurrentDuel<Facets> duel = new ConcurrentDuel<>(5);
         String[] fieldPostFix = new String[]{"", "_mv"};
@@ -575,6 +581,9 @@ public class SimpleFacetsTests extends ElasticsearchIntegrationTest {
                               final SearchRequestBuilder facetRequest;
                               int incrementAndGet = count.incrementAndGet();
                               final String field;
+                              if (incrementAndGet % 100 == 0) {
+                                  logger.info("-> run {} searches", incrementAndGet);
+                              }
                               switch (incrementAndGet % 2) {
                                   case 1:
                                       field = "filtered" + postfix;
@@ -620,7 +629,7 @@ public class SimpleFacetsTests extends ElasticsearchIntegrationTest {
                               SearchResponse actionGet = facetRequest.execute().actionGet();
                               return actionGet.getFacets();
                           }
-                      }, 5000
+                      }, 2000
             );
         }
 
