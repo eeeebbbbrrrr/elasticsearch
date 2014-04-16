@@ -52,6 +52,11 @@ public class PlainHighlighter implements Highlighter {
         return new String[] { "plain", "highlighter" };
     }
 
+    @Override
+    public boolean canHighlight(HighlighterContext highlighterContext) {
+        return true;
+    }
+
     public HighlightField highlight(HighlighterContext highlighterContext) {
         SearchContextHighlight.Field field = highlighterContext.field;
         SearchContext context = highlighterContext.context;

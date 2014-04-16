@@ -36,6 +36,11 @@ public class CustomHighlighter implements Highlighter {
     }
 
     @Override
+    public boolean canHighlight(HighlighterContext highlighterContext) {
+        return true;
+    }
+
+    @Override
     public HighlightField highlight(HighlighterContext highlighterContext) {
         SearchContextHighlight.Field field = highlighterContext.field;
 

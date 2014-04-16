@@ -56,11 +56,17 @@ public class PostingsHighlighter implements Highlighter {
     }
 
     @Override
+    public boolean canHighlight(HighlighterContext highlighterContext) {
+        FieldMapper<?> fieldMapper = highlighterContext.mapper;
+        return fieldMapper.fieldType().indexOptions() == FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS;
+    }
+
+    @Override
     public HighlightField highlight(HighlighterContext highlighterContext) {
 
         FieldMapper<?> fieldMapper = highlighterContext.mapper;
         SearchContextHighlight.Field field = highlighterContext.field;
-        if (fieldMapper.fieldType().indexOptions() != FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS) {
+        if (!canHighlight(highlighterContext)) {
             throw new ElasticsearchIllegalArgumentException("the field [" + highlighterContext.fieldName + "] should be indexed with positions and offsets in the postings list to be used with postings highlighter");
         }
 

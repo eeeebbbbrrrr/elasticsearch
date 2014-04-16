@@ -58,13 +58,19 @@ public class FastVectorHighlighter implements Highlighter {
     }
 
     @Override
+    public boolean canHighlight(HighlighterContext highlighterContext) {
+        FieldMapper<?> mapper = highlighterContext.mapper;
+        return mapper.fieldType().storeTermVectors() && mapper.fieldType().storeTermVectorOffsets() && mapper.fieldType().storeTermVectorPositions();
+    }
+
+    @Override
     public HighlightField highlight(HighlighterContext highlighterContext) {
         SearchContextHighlight.Field field = highlighterContext.field;
         SearchContext context = highlighterContext.context;
         FetchSubPhase.HitContext hitContext = highlighterContext.hitContext;
         FieldMapper<?> mapper = highlighterContext.mapper;
 
-        if (!(mapper.fieldType().storeTermVectors() && mapper.fieldType().storeTermVectorOffsets() && mapper.fieldType().storeTermVectorPositions())) {
+        if (!canHighlight(highlighterContext)) {
             throw new ElasticsearchIllegalArgumentException("the field [" + highlighterContext.fieldName + "] should be indexed with term vector with position offsets to be used with fast vector highlighter");
         }
 

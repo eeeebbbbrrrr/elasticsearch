@@ -74,7 +74,7 @@ public class HighlighterParseElement implements SearchParseElement {
                 .requireFieldMatch(false).forceSource(false).fragmentCharSize(100).numberOfFragments(5)
                 .encoder("default").boundaryMaxScan(SimpleBoundaryScanner.DEFAULT_MAX_SCAN)
                 .boundaryChars(SimpleBoundaryScanner.DEFAULT_BOUNDARY_CHARS)
-                .noMatchSize(0).phraseLimit(256);
+                .noMatchSize(0).phraseLimit(256).lenient(false);
 
         while ((token = parser.nextToken()) != XContentParser.Token.END_OBJECT) {
             if (token == XContentParser.Token.FIELD_NAME) {
@@ -131,6 +131,8 @@ public class HighlighterParseElement implements SearchParseElement {
                     globalOptionsBuilder.forceSource(parser.booleanValue());
                 } else if ("phrase_limit".equals(topLevelFieldName) || "phraseLimit".equals(topLevelFieldName)) {
                     globalOptionsBuilder.phraseLimit(parser.intValue());
+                } else if ("lenient".equals(topLevelFieldName)) {
+                    globalOptionsBuilder.lenient(parser.booleanValue());
                 }
             } else if (token == XContentParser.Token.START_OBJECT && "options".equals(topLevelFieldName)) {
                 globalOptionsBuilder.options(parser.map());
@@ -198,6 +200,8 @@ public class HighlighterParseElement implements SearchParseElement {
                                         fieldOptionsBuilder.forceSource(parser.booleanValue());
                                     } else if ("phrase_limit".equals(fieldName) || "phraseLimit".equals(fieldName)) {
                                         fieldOptionsBuilder.phraseLimit(parser.intValue());
+                                    } else if ("lenient".equals(fieldName)) {
+                                        fieldOptionsBuilder.lenient(parser.booleanValue());
                                     }
                                 } else if (token == XContentParser.Token.START_OBJECT) {
                                     if ("highlight_query".equals(fieldName) || "highlightQuery".equals(fieldName)) {

@@ -123,9 +123,12 @@ public class HighlightPhase extends AbstractComponent implements FetchSubPhase {
                     highlightQuery = new HighlighterContext.HighlightQuery(field.fieldOptions().highlightQuery(), field.fieldOptions().highlightQuery(), false);
                 }
                 HighlighterContext highlighterContext = new HighlighterContext(fieldName, field, fieldMapper, context, hitContext, highlightQuery);
-                HighlightField highlightField = highlighter.highlight(highlighterContext);
-                if (highlightField != null) {
-                    highlightFields.put(highlightField.name(), highlightField);
+
+                if (!field.fieldOptions().lenient() || highlighter.canHighlight(highlighterContext)) {
+                    HighlightField highlightField = highlighter.highlight(highlighterContext);
+                    if (highlightField != null) {
+                        highlightFields.put(highlightField.name(), highlightField);
+                    }
                 }
             }
         }

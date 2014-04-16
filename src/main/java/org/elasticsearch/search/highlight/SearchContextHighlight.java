@@ -119,6 +119,8 @@ public class SearchContextHighlight {
 
         private int phraseLimit = -1;
 
+        private Boolean lenient;
+
         public int fragmentCharSize() {
             return fragmentCharSize;
         }
@@ -182,6 +184,8 @@ public class SearchContextHighlight {
         public int phraseLimit() {
             return phraseLimit;
         }
+
+        public Boolean lenient() { return lenient; }
 
         public Set<String> matchedFields() {
             return matchedFields;
@@ -280,6 +284,11 @@ public class SearchContextHighlight {
                 return this;
             }
 
+            Builder lenient(boolean lenient) {
+                fieldOptions.lenient = lenient;
+                return this;
+            }
+
             Builder matchedFields(Set<String> matchedFields) {
                 fieldOptions.matchedFields = matchedFields;
                 return this;
@@ -345,6 +354,9 @@ public class SearchContextHighlight {
                 }
                 if (fieldOptions.phraseLimit == -1) {
                     fieldOptions.phraseLimit = globalOptions.phraseLimit;
+                }
+                if (fieldOptions.lenient == null) {
+                    fieldOptions.lenient = globalOptions.lenient;
                 }
 
                 return this;

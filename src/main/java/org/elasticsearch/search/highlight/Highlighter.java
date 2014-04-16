@@ -25,5 +25,7 @@ public interface Highlighter {
 
     String[] names();
 
+    boolean canHighlight(HighlighterContext highlighterContext);
+
     HighlightField highlight(HighlighterContext highlighterContext);
 }
